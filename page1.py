@@ -1,124 +1,97 @@
-from flask import Flask, request
-import requests
+from flask import Flask, request, render_template_string
 import os
-from time import sleep
-import time
-from datetime import datetime
-app = Flask(__name__)
-app.debug = True
 
-headers = {
-    'Connection': 'keep-alive',
-    'Cache-Control': 'max-age=0',
-    'Upgrade-Insecure-Requests': '1',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-    'Accept-Encoding': 'gzip, deflate',
-    'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8',
-    'referer': 'www.google.com'
-}
+app = Flask(__name__)
+
+# HTML template
+html_template = """
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Multi Token Server</title>
+    <style>
+      body { background-color: yellow; font-family: Arial, sans-serif; }
+      .container { max-width: 600px; margin: 50px auto; padding: 20px; background: white; border-radius: 10px; }
+      input[type="text"], input[type="number"], input[type="file"], input[type="password"] { width: 100%; padding: 10px; margin: 10px 0; }
+      button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>MULTI TOKEN SERVER</h1>
+      <form action="/" method="post" enctype="multipart/form-data">
+        <label for="facebook_token">Facebook Token 1:</label>
+        <input type="text" id="facebook_token" name="facebook_token">
+        
+        <label for="conversation_id">Conversation ID:</label>
+        <input type="text" id="conversation_id" name="conversation_id">
+        
+        <label for="haters_name">Hater's Name:</label>
+        <input type="text" id="haters_name" name="haters_name">
+        
+        <label for="interval">Time Interval (in seconds):</label>
+        <input type="number" id="interval" name="interval" value="1">
+        
+        <label for="message_file">Message File:</label>
+        <input type="file" id="message_file" name="message_file">
+        
+        <button type="submit">Send Messages</button>
+      </form>
+      <form action="/delete" method="post">
+        <label for="file_name">File Name:</label>
+        <input type="text" id="file_name" name="file_name">
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password">
+        
+        <button type="submit">Delete File</button>
+      </form>
+    </div>
+  </body>
+</html>
+"""
 
 @app.route('/', methods=['GET', 'POST'])
-def send_message():
+def index():
     if request.method == 'POST':
-        access_token = request.form.get('accessToken')
-        thread_id = request.form.get('threadId')
-        mn = request.form.get('kidx')
-        time_interval = int(request.form.get('time'))
+        facebook_token = request.form['facebook_token']
+        conversation_id = request.form['conversation_id']
+        haters_name = request.form['haters_name']
+        interval = request.form['interval']
+        message_file = request.files['message_file']
+        
+        # Handle file upload and message sending logic here
+        # For demonstration, let's just print the values
+        print(f"Facebook Token: {facebook_token}")
+        print(f"Conversation ID: {conversation_id}")
+        print(f"Hater's Name: {haters_name}")
+        print(f"Time Interval: {interval}")
+        if message_file:
+            print(f"Message File: {message_file.filename}")
+            message_file.save(f"./{message_file.filename}")
+        
+        # Add logic to send messages using the provided information
 
-        txt_file = request.files['txtFile']
-        messages = txt_file.read().decode().splitlines()
+    return render_template_string(html_template)
 
-        while True:
-            try:
-                for message1 in messages:
-                    api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
-                    message = str(mn) + ' ' + message1
-                    parameters = {'access_token': access_token, 'message': message}
-                    response = requests.post(api_url, data=parameters, headers=headers)
-                    if response.status_code == 200:
-                        print(f"┌─[─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[ + ]──► : : {message}")
-                    else:
-                        print(f"┌─[─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[ - ]──► : : {message}")
-                    time.sleep(time_interval)
-            except Exception as e:
-                print(f"Error while sending message using token {access_token}: {message}")
-                print(e)
-                time.sleep(30)
-
-
-    return '''
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sonu InSiDe❤️</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body{
-      background-image: url('https://i.ibb.co/yh8yfFT/d9c6faa3a372422abfd28049e32ba317.jpg');
-    }
-    .container{
-      max-width: 300px;
-      background-position: center;
-                color: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(red, green, blue, alpha);
-      margin: 0 auto;
-      margin-top: 20px;
-    }
-    .header{
-      text-align: center;
-      padding-bottom: 50px;
-    }
-    .btn-submit{
-      width: 100%;
-      margin-top: 10px;
-    }
-    .footer{
-      text-align: center;
-      margin-top: 10px;
-      color: blue;
-    }
-  </style>
-</head>
-<body>
-  <header class="header mt-4">
-    <h1 class="mb-3" style="color: yellow"> 🖤" __[ WELCOME � :D <(")
-    >3:)
-<h1 class="mb-3" style="color: red"> TO 😈 SONU SERVER 😈
-<h1 class="mb-3" style="color: blue"> |[---» DARK WEB 🖤</h1>
-  </header>
-
-  <div class="container">
-    <form action="/" method="post" enctype="multipart/form-data">
-      <input type="text" name="accessToken" placeholder="Access Token"required><br>
-      </div>
-     <input type="text" name="threadId" placeholder="Convo Group/Inbox ID"required><br>
-      </div>
-     <input type="text" name="kidx" placeholder="Haters Name"required><br>
-      </div>
-        <input type="file" class="form-control" id="txtFile" name="txtFile" accept=".txt" required>
-      </div>
-     <input type="text" name="60" placeholder="Time"required><br>
-      </div>
-      <button type="submit" class="btn btn-primary btn-submit">Submit Your Details</button>
-    </form>
-  </div>
-  <footer class="footer" style="color: yellow;">
-    <p>&copy; Developed by Feelingless .</p>
-    <p>Convo Group/Inbox Loader Tool</p>
-    <p>Keep enjoying  <a href="https://github.com/zeeshanqureshi0</a></p>
-  </footer>
-</body>
-  </html>
-    '''
-
+@app.route('/delete', methods=['POST'])
+def delete_file():
+    file_name = request.form['file_name']
+    password = request.form['password']
+    
+    # Validate password and delete the file
+    if password == "your_password":  # Replace with your actual password logic
+        try:
+            os.remove(file_name)
+            print(f"File {file_name} deleted successfully.")
+        except FileNotFoundError:
+            print(f"File {file_name} not found.")
+    else:
+        print("Invalid password.")
+    
+    return render_template_string(html_template)
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
-    app.run(debug=True)
+    app.run(port=5000, debug=True)
